@@ -9,7 +9,6 @@
 
 ## Why I Chose This Issue
 
-[1-2 paragraphs explaining why this issue interests you, how it matches your skills/learning goals, what you hope to learn]
 I chose this issue because it directly improves PyTorch Ignite's EpochMetric class, which is a core component used in ML training pipelines. The task is well-scoped: extending compute_fn to support more output types beyond scalars. The maintainer has already provided implementation hints and a reference to Detectron2's code, making it 
 a good starting point for contributing to a real ML framework. As someone targeting AI Engineer roles, working on PyTorch's ecosystem is directly relevant to my career goals.
 
