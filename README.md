@@ -1,9 +1,9 @@
-# Contribution [1]: [More EpochMetric's compute_fn output types]
+# Contribution 1: More EpochMetric's compute_fn output types
 
-**Contribution Number:** [1]  
-**Student:** [Zongyang Li]  
-**Issue:** [https://github.com/pytorch/ignite/issues/1757]  
-**Status:** [Phase I] [In Progress]
+**Contribution Number:** 1  
+**Student:** Zongyang Li  
+**Issue:** https://github.com/pytorch/ignite/issues/1757  
+**Status:** [Phase II] [In Progress]
 
 ---
 
@@ -18,19 +18,20 @@ a good starting point for contributing to a real ML framework. As someone target
 
 ### Problem Description
 
-[In your own words, what's broken or missing?]
+EpochMetric._result is typed as float, and compute() only handles scalar outputs. When compute_fn returns a tensor, tuple, or mapping, the code either fails silently or causes a type error downstream.
 
 ### Expected Behavior
 
-[What should happen?]
+EpochMetric should support compute_fn returning scalars, tensors, tuple/list of tensors, and mapping of tensors, with a clear TypeError for unsupported types.
 
 ### Current Behavior
 
-[What actually happens?]
+compute_fn can only return a scalar (int or float). Returning other types causes silent failures or confusing downstream errors.
 
 ### Affected Components
 
-[Which parts of the codebase are involved?]
+- ignite/metrics/epoch_metric.py (EpochMetric class, compute method)
+- tests/ignite/metrics/test_epoch_metric.py
 
 ---
 
@@ -38,19 +39,24 @@ a good starting point for contributing to a real ML framework. As someone target
 
 ### Environment Setup
 
-[Notes on setting up your local development environment - challenges you faced, how you solved them]
+- OS: macOS
+- Python: 3.10.20 (conda env: ignite-dev)
+- PyTorch: 2.12.0
+- pytorch-ignite: 0.6.0 (installed with pip install -e)
+- pytest: 9.0.3
 
 ### Steps to Reproduce
 
-1. [Step 1]
-2. [Step 2]
-3. [Observed result]
+1. Create EpochMetric with a compute_fn that returns a tensor
+2. Call compute()
+3. Result: no TypeError raised but downstream code fails silently
+   because _result is typed as float only
 
 ### Reproduction Evidence
 
-- **Commit showing reproduction:** [Link to commit in your fork]
+- **Commit showing reproduction:** N/A — reproduced by code inspection. epoch_metric.py line shows _result: float | None and compute() -> float, confirming the limitation described in the issue.
 - **Screenshots/logs:** [If applicable]
-- **My findings:** [What you discovered during reproduction]
+- **My findings:** The _result type annotation and compute() return type were both float, and there was no type validation on compute_fn output. apply_to_type already existed in ignite/utils.py and could be reused for distributed broadcasting.
 
 ---
 
@@ -58,30 +64,41 @@ a good starting point for contributing to a real ML framework. As someone target
 
 ### Analysis
 
-[Your analysis of the root cause - what's causing the issue?]
+The root cause is in compute() method of EpochMetric:
+1. _result is typed as float | None, limiting output to scalars
+2. No type validation on compute_fn output
+3. Distributed broadcasting only handled float scalars
+
+The fix requires extending type annotations, adding validation, and using the existing apply_to_type utility for non-scalar broadcasting.
 
 ### Proposed Solution
 
-[High-level description of your fix approach]
+- Extended _result type to support float, torch.Tensor, Sequence, Mapping
+- Added type validation in compute() with clear TypeError message
+- Used existing apply_to_type utility for distributed broadcasting
+- Updated docstring to document supported output types
+- Added 3 new tests covering tensor, tuple, and invalid output types
 
 ### Implementation Plan
 
 Using UMPIRE framework (adapted):
 
-**Understand:** [Restate the problem]
+**Understand:** EpochMetric.compute_fn only supports scalar outputs, but users need tensor/tuple/mapping support.
 
-**Match:** [What similar patterns/solutions exist in the codebase?]
+**Match:** ignite/utils.py already has apply_to_type that recursively applies a function to tensors inside any nested structure.
 
-**Plan:** [Step-by-step implementation plan]
-1. [Modify file X to do Y]
-2. [Add function Z]
-3. [Update tests]
+**Plan:** 
+1. Extend _result type annotation in reset()
+2. Update compute() return type and add type validation
+3. Use apply_to_type for distributed broadcasting of non-scalar results
+4. Update docstring
+5. Add tests for new output types
 
-**Implement:** [Link to your branch/commits as you work]
+**Implement:** https://github.com/zongyang078/ignite/tree/feature/epoch-metric-output-types
 
-**Review:** [Self-review checklist - does it follow the project's contribution guidelines?]
+**Review:** Follows existing code style, uses existing utilities, adds tests for all new cases.
 
-**Evaluate:** [How will you verify it works?]
+**Evaluate:** Run pytest tests/ignite/metrics/test_epoch_metric.py - all 13 tests pass.
 
 ---
 
@@ -89,36 +106,47 @@ Using UMPIRE framework (adapted):
 
 ### Unit Tests
 
-- [ ] Test case 1: [Description]
-- [ ] Test case 2: [Description]
-- [ ] Test case 3: [Description]
+- [x] Test case 1: compute_fn returning a tensor (per-class MSE)
+- [x] Test case 2: compute_fn returning a tuple of tensors (MSE + MAE)
+- [x] Test case 3: compute_fn returning invalid type (str) raises TypeError
 
 ### Integration Tests
 
-- [ ] Integration scenario 1
-- [ ] Integration scenario 2
+- [ ] N/A for this change — existing test_distrib_integration covers the distributed scenario and passes with our changes
 
 ### Manual Testing
 
-[What you tested manually and results]
+Ran pytest tests/ignite/metrics/test_epoch_metric.py: 13 passed, 9 skipped (no CUDA/GPU), 1 pre-existing error (gloo_cpu requires pytest-xdist, unrelated to our changes).
 
 ---
 
 ## Implementation Notes
 
-### Week [X] Progress
+### Week 1 Progress (Phase I)
 
-[What you built this week, challenges faced, decisions made]
+- Explored issue candidates from CodePath's list
+- Selected ignite issue #1757 based on maintainer guidance and 
+  relevance to AI Engineer career goals
+- Forked pytorch/ignite repository
+- Set up local dev environment (conda ignite-dev, Python 3.10)
 
-### Week [Y] Progress
+### Week 2 Progress (Phase II)
 
-[Continue documenting as you work]
+- Identified affected files using grep
+- Read maintainer's implementation hints in PR #1700
+- Extended EpochMetric to support tensor/tuple/mapping outputs
+- Discovered str is a subclass of Sequence, added explicit str exclusion
+- Added 3 new tests, all passing
+- Updated docstring
 
 ### Code Changes
 
-- **Files modified:** [List]
-- **Key commits:** [Links to important commits]
-- **Approach decisions:** [Why you chose certain approaches]
+- **Files modified:** ignite/metrics/epoch_metric.py, tests/ignite/metrics/test_epoch_metric.py
+- **Key commits:** 
+  - [feat: extend EpochMetric](https://github.com/zongyang078/ignite/commit/2f12622f)
+  - [test: add tests](https://github.com/zongyang078/ignite/commit/c6e82c06)
+  - [docs: update docstring](https://github.com/zongyang078/ignite/commit/7c185831)
+- **Approach decisions:** Used existing apply_to_type utility instead of reimplementing recursive tensor handling
 
 ---
 
