@@ -3,7 +3,7 @@
 **Contribution Number:** 1  
 **Student:** Zongyang Li  
 **Issue:** https://github.com/pytorch/ignite/issues/1757  
-**Status:** [Phase II] [In Progress]
+**Status:** [Phase III] [In Progress]
 
 ---
 
@@ -130,7 +130,7 @@ Ran pytest tests/ignite/metrics/test_epoch_metric.py: 13 passed, 9 skipped (no C
 - Forked pytorch/ignite repository
 - Set up local dev environment (conda ignite-dev, Python 3.10)
 
-### Week 2 Progress (Phase II)
+### Week 2 Progress (Phase II&III)
 
 - Identified affected files using grep
 - Read maintainer's implementation hints in PR #1700
