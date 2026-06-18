@@ -3,7 +3,7 @@
 **Contribution Number:** 1  
 **Student:** Zongyang Li  
 **Issue:** https://github.com/pytorch/ignite/issues/1757  
-**Status:** [Phase III] [In Progress]
+**Status:** [Phase IV] [Complete]
 
 ---
 
@@ -139,6 +139,11 @@ Ran pytest tests/ignite/metrics/test_epoch_metric.py: 13 passed, 9 skipped (no C
 - Added 3 new tests, all passing
 - Updated docstring
 
+### Week 3 Progress (Phase IV)
+- Submitted PR #3789 to pytorch/ignite
+- PR is open and awaiting maintainer review
+- CI checks pending maintainer approval
+
 ### Code Changes
 
 - **Files modified:** ignite/metrics/epoch_metric.py, tests/ignite/metrics/test_epoch_metric.py
@@ -152,15 +157,15 @@ Ran pytest tests/ignite/metrics/test_epoch_metric.py: 13 passed, 9 skipped (no C
 
 ## Pull Request
 
-**PR Link:** [GitHub PR URL when submitted]
+**PR Link:** https://github.com/pytorch/ignite/pull/3789
 
-**PR Description:** [Draft or final PR description - much of the content above can be adapted]
+**PR Description:** Extended EpochMetric to support tensor, tuple/list, and mapping outputs from compute_fn. Added type validation with clear TypeError for unsupported types. Reused apply_to_type for distributed broadcasting. Added 3 new tests, updated docstring.
 
 **Maintainer Feedback:**
 - [Date]: [Summary of feedback received]
 - [Date]: [How you addressed it]
 
-**Status:** [Awaiting review / Iterating / Approved / Merged]
+**Status:** [Awaiting review]
 
 ---
 
@@ -168,20 +173,28 @@ Ran pytest tests/ignite/metrics/test_epoch_metric.py: 13 passed, 9 skipped (no C
 
 ### Technical Skills Gained
 
-[What you learned technically]
+- Learned how Python's type system works (str is a subclass of Sequence)
+- Learned how to use git stash to isolate changes for testing
+- Understood how distributed broadcasting works in ignite with apply_to_type
+- Practiced reading and contributing to a large real-world ML codebase
 
 ### Challenges Overcome
 
-[What was hard and how you solved it]
+- Discovered that str passes isinstance check for Sequence, required 
+  explicit exclusion — caught by a failing test
+- gloo_cpu test error turned out to be a pre-existing environment issue, 
+  confirmed by testing on original codebase with git stash
 
 ### What I'd Do Differently Next Time
 
-[Reflection on your process]
+- Set up the dev environment earlier before selecting the issue
+- Read CONTRIBUTING.md more carefully before writing the first commit
 
 ---
 
 ## Resources Used
 
-- [Link to helpful documentation]
-- [Tutorial or Stack Overflow post that helped]
-- [GitHub issues or discussions that helped]
+- [ignite CONTRIBUTING.md](https://github.com/pytorch/ignite/blob/master/CONTRIBUTING.md)
+- [Maintainer's implementation hints in PR #1700](https://github.com/pytorch/ignite/pull/1700#issuecomment-790413236)
+- [Detectron2 comm.py reference](https://github.com/facebookresearch/detectron2/blob/7f8f29deae278b75625872c8a0b00b74129446ac/detectron2/utils/comm.py#L148)
+- [ignite issue #1757](https://github.com/pytorch/ignite/issues/1757)
