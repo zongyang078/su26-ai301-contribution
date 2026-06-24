@@ -106,9 +106,11 @@ Using UMPIRE framework (adapted):
 
 ### Unit Tests
 
-- [x] Test case 1: compute_fn returning a tensor (per-class MSE)
-- [x] Test case 2: compute_fn returning a tuple of tensors (MSE + MAE)
-- [x] Test case 3: compute_fn returning invalid type (str) raises TypeError
+- [x] Test case 1: compute_fn returning a torch.Tensor
+- [x] Test case 2: compute_fn returning a tuple of tensors
+- [x] Test case 3: compute_fn returning a list of tensors
+- [x] Test case 4: compute_fn returning a dict (Mapping) of tensors
+- [x] Test case 5: compute_fn returning invalid type (str) raises TypeError
 
 ### Integration Tests
 
@@ -159,13 +161,17 @@ Ran pytest tests/ignite/metrics/test_epoch_metric.py: 13 passed, 9 skipped (no C
 
 **PR Link:** https://github.com/pytorch/ignite/pull/3789
 
-**PR Description:** Extended EpochMetric to support tensor, tuple/list, and mapping outputs from compute_fn. Added type validation with clear TypeError for unsupported types. Reused apply_to_type for distributed broadcasting. Added 3 new tests, updated docstring.
+**PR Description:** Extended EpochMetric to support tensor, tuple/list, and mapping outputs from compute_fn. Added EpochMetricOutput type alias, type validation with clear TypeError for unsupported types, and reused apply_to_type for distributed broadcasting. Added 5 new tests covering tensor, tuple, list, dict, and invalid output types. Updated docstring.
 
 **Maintainer Feedback:**
-- [Date]: [Summary of feedback received]
-- [Date]: [How you addressed it]
+- 2026-06-19: aaishwarymishra (ignite collaborator) suggested creating 
+  a type alias, removing inline type annotation, and adding per-datatype 
+  test coverage
+- 2026-06-24: Addressed all feedback — created EpochMetricOutput type 
+  alias, removed inline annotation, added list/dict tests, kept str 
+  check with explanation (str is subclass of Sequence in Python)
 
-**Status:** [Awaiting review]
+**Status:** Awaiting review after addressing feedback
 
 ---
 
