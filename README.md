@@ -106,10 +106,10 @@ Using UMPIRE framework (adapted):
 
 ### Unit Tests
 
-- [x] Test case 1: compute_fn returning a torch.Tensor
-- [x] Test case 2: compute_fn returning a tuple of tensors
-- [x] Test case 3: compute_fn returning a list of tensors
-- [x] Test case 4: compute_fn returning a dict (Mapping) of tensors
+- [x] Test case 1: compute_fn returning torch.Tensor — type, shape, value verified
+- [x] Test case 2: compute_fn returning tuple of tensors — type, length, value verified
+- [x] Test case 3: compute_fn returning list of tensors — type, length, value verified
+- [x] Test case 4: compute_fn returning dict (Mapping) — type, keys, value verified
 - [x] Test case 5: compute_fn returning invalid type (str) raises TypeError
 
 ### Integration Tests
@@ -118,7 +118,7 @@ Using UMPIRE framework (adapted):
 
 ### Manual Testing
 
-Ran pytest tests/ignite/metrics/test_epoch_metric.py: 13 passed, 9 skipped (no CUDA/GPU), 1 pre-existing error (gloo_cpu requires pytest-xdist, unrelated to our changes).
+Ran python3 -m pytest tests/ignite/metrics/test_epoch_metric.py:15 passed, 9 skipped (no CUDA/GPU/XLA), 1 pre-existing error (gloo_cpu requires pytest-xdist, unrelated to our changes).
 
 ---
 
@@ -164,12 +164,10 @@ Ran pytest tests/ignite/metrics/test_epoch_metric.py: 13 passed, 9 skipped (no C
 **PR Description:** Extended EpochMetric to support tensor, tuple/list, and mapping outputs from compute_fn. Added EpochMetricOutput type alias, type validation with clear TypeError for unsupported types, and reused apply_to_type for distributed broadcasting. Added 5 new tests covering tensor, tuple, list, dict, and invalid output types. Updated docstring.
 
 **Maintainer Feedback:**
-- 2026-06-19: aaishwarymishra (ignite collaborator) suggested creating 
-  a type alias, removing inline type annotation, and adding per-datatype 
-  test coverage
-- 2026-06-24: Addressed all feedback — created EpochMetricOutput type 
-  alias, removed inline annotation, added list/dict tests, kept str 
-  check with explanation (str is subclass of Sequence in Python)
+- 2026-06-19: aaishwarymishra (ignite collaborator) suggested creating a type alias, removing inline type annotation, and adding per-datatype test coverage
+- 2026-06-24: Addressed all feedback — created EpochMetricOutput type alias, removed inline annotation, added list/dict tests, kept str check with explanation (str is subclass of Sequence in Python)
+- 2026-06-24: aaishwarymishra requested value verification in tests
+- 2026-07-01: Added torch.allclose verification for all output types (tensor, tuple, list, dict), confirming EpochMetric correctly collects and passes data to compute_fn
 
 **Status:** Awaiting review after addressing feedback
 
@@ -183,18 +181,22 @@ Ran pytest tests/ignite/metrics/test_epoch_metric.py: 13 passed, 9 skipped (no C
 - Learned how to use git stash to isolate changes for testing
 - Understood how distributed broadcasting works in ignite with apply_to_type
 - Practiced reading and contributing to a large real-world ML codebase
+- Learned the difference between type/shape verification and value verification in tests — "not crashing" is not the same as "correct"
+- Learned torch.allclose for comparing floating point tensors
+
 
 ### Challenges Overcome
 
-- Discovered that str passes isinstance check for Sequence, required 
-  explicit exclusion — caught by a failing test
-- gloo_cpu test error turned out to be a pre-existing environment issue, 
-  confirmed by testing on original codebase with git stash
+- Discovered that str passes isinstance check for Sequence, required explicit exclusion — caught by a failing test
+- gloo_cpu test error turned out to be a pre-existing environment issue, confirmed by testing on original codebase with git stash
+- list/dict tests failed because output2 was missing — caught immediately 
+  by running pytest
 
 ### What I'd Do Differently Next Time
 
 - Set up the dev environment earlier before selecting the issue
 - Read CONTRIBUTING.md more carefully before writing the first commit
+- Include value verification in tests from the start, not as a later iteration after reviewer feedback
 
 ---
 
